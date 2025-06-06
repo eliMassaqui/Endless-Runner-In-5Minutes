@@ -18,13 +18,9 @@ public class SwipeControls : MonoBehaviour
                     instance = new GameObject("Spawned SwipeControls", typeof(SwipeControls)).GetComponent<SwipeControls>();
                 }
             }
-
             return instance;
         }
-        set
-        {
-            instance = value;
-        }
+        set { instance = value; }
     }
     #endregion
 
@@ -35,10 +31,10 @@ public class SwipeControls : MonoBehaviour
     private float lasttap;
     private float sqrdeadzone;
 
-    #region public properties
-    public Vector2 Swipedelta { get { return swipedelta; } }
-    public bool Swipeleft { get { return swipeleft; } }
-    public bool Swiperight { get { return swiperight; } }
+    #region Public Properties
+    public Vector2 Swipedelta => swipedelta;
+    public bool Swipeleft => swipeleft;
+    public bool Swiperight => swiperight;
     #endregion
 
     private void Start()
@@ -46,53 +42,73 @@ public class SwipeControls : MonoBehaviour
         sqrdeadzone = deadzone * deadzone;
     }
 
-    public void LateUpdate()
+    private void LateUpdate()
     {
         swipeleft = swiperight = false;
 
-        UpdateMobile();
+        HandleTouch();
+        HandleKeyboard();
+        HandleGamepad();
     }
 
-    public void UpdateMobile()
+    private void HandleTouch()
     {
-        if (Input.touches.Length != 0)
+        if (Input.touchCount > 0)
         {
-            if (Input.touches[0].phase == TouchPhase.Began)
+            Touch touch = Input.touches[0];
+
+            if (touch.phase == TouchPhase.Began)
             {
-                starttouch = Input.mousePosition;               
-                Debug.Log(Time.time - lasttap);
+                starttouch = touch.position;
                 lasttap = Time.time;
             }
-            else if (Input.touches[0].phase == TouchPhase.Ended || Input.touches[0].phase == TouchPhase.Canceled)
+            else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
             {
                 starttouch = swipedelta = Vector2.zero;
             }
-        }
 
-        swipedelta = Vector2.zero;
+            swipedelta = Vector2.zero;
 
-        if(starttouch != Vector2.zero && Input.touches.Length != 0)
-        {
-            swipedelta = Input.touches[0].position - starttouch;
-        }
+            if (starttouch != Vector2.zero)
+                swipedelta = touch.position - starttouch;
 
-        if(swipedelta.sqrMagnitude > sqrdeadzone)
-        {
-            float x = swipedelta.x;
-            float y = swipedelta.y;
-            if (Mathf.Abs(x) > Mathf.Abs(y))
+            if (swipedelta.sqrMagnitude > sqrdeadzone)
             {
-                if (x < 0)
-                {
-                    swipeleft = true;
-                }
-                else
-                {
-                    swiperight = true;
-                }
-            }           
-            starttouch = swipedelta = Vector2.zero;
+                DetectSwipe(swipedelta);
+                starttouch = swipedelta = Vector2.zero;
+            }
         }
     }
 
+    private void HandleKeyboard()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            swipeleft = true;
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+            swiperight = true;
+    }
+
+    private void HandleGamepad()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+
+        if (horizontal < -0.5f)
+            swipeleft = true;
+        else if (horizontal > 0.5f)
+            swiperight = true;
+    }
+
+    private void DetectSwipe(Vector2 delta)
+    {
+        float x = delta.x;
+        float y = delta.y;
+
+        if (Mathf.Abs(x) > Mathf.Abs(y))
+        {
+            if (x < 0)
+                swipeleft = true;
+            else
+                swiperight = true;
+        }
+    }
 }

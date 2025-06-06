@@ -403,10 +403,10 @@ MonoBehaviour:
   m_bendOn: 1
   m_curveOrigin: {fileID: 963194228}
   m_referenceDirection: {fileID: 963194228}
-  m_curvature: 400
+  m_curvature: 0
   m_xScale: 0.5
   m_zScale: 0.6
-  m_flatMargin: 0
+  m_flatMargin: 8
   m_horizonWaves: 0
   m_horizonWaveFrequency: 0
 --- !u!1 &1366496882
